@@ -20,9 +20,12 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 
 // Default route
+const path = require('path'); // Make sure this is at the top
+
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
+
 
 // Start server
 const PORT = process.env.PORT || 3000;
