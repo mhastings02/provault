@@ -5,27 +5,23 @@ const cors = require('cors');
 const app = express(); // ← MUST come first
 
 app.use(cors());
-app.use(express.json()); // ← Correct
-app.use(express.urlencoded({ extended: true })); // ← Correct
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static frontend
 app.use(express.static('public'));
-
 
 // Routes
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 
 app.use('/auth', authRoutes);
-
+app.use('/admin', adminRoutes);
 
 // Default route
-const path = require('path'); // Make sure this is at the top
-
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-
 
 // Start server
 const PORT = process.env.PORT || 3000;
