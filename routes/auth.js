@@ -1,19 +1,21 @@
-
 const express = require('express');
+const passport = require('passport');
 const router = express.Router();
 
-const hardcodedEmail = 'admin@example.com';
-const hardcodedPassword = 'password123';
+// Real login using Passport
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  if (req.user.role === 'admin') {
+    return res.redirect('/admin-vault.html');
+  } else {
+    return res.redirect('/vault.html');
+  }
+});
 
-router.post('/auth/login', (req, res) => {
-    const { email, password } = req.body;
-
-    if (email === hardcodedEmail && password === hardcodedPassword) {
-        const fakeToken = 'hardcoded-jwt-token';
-        res.json({ token: fakeToken });
-    } else {
-        res.status(401).json({ message: 'Invalid credentials' });
-    }
+// Logout route
+router.post('/logout', (req, res) => {
+  req.logout(() => {
+    res.redirect('/');
+  });
 });
 
 module.exports = router;
