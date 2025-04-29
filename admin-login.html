@@ -129,7 +129,14 @@
   </div>
 
 <script>
-  const apiBase = ''; // same origin
+  // Admin-only guard check
+  fetch('/auth/check')
+    .then(res => res.json())
+    .then(data => {
+      if (!data.isAdmin) {
+        window.location.href = '/login.html';
+      }
+    });
 
   async function loadUsers() {
     const res = await fetch('/admin/users');
@@ -141,7 +148,7 @@
     users.forEach(user => {
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td>${user.name || 'Unnamed'}</td>
+        <td>${user.username || 'Unnamed'}</td>
         <td>${user.email}</td>
         <td><span class="role">${user.role}</span></td>
         <td>
@@ -171,7 +178,7 @@
       const data = await res.json();
       if (!res.ok) {
         msg.className = 'error';
-        msg.innerText = data.message || 'Error creating user';
+        msg.innerText = data.error || 'Error creating user';
       } else {
         msg.className = 'success';
         msg.innerText = 'User created!';
@@ -185,20 +192,25 @@
   });
 
   document.querySelector('#userTable').addEventListener('click', async (e) => {
+    const id = e.target.dataset.id;
+
     if (e.target.classList.contains('delete')) {
-      const id = e.target.dataset.id;
-      await fetch(`/admin/delete-user/${id}`, { method: 'DELETE' });
+      await fetch(`/admin/delete-user/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
       loadUsers();
     }
 
     if (e.target.classList.contains('promote')) {
-      const id = e.target.dataset.id;
-      await fetch(`/admin/promote-user/${id}`, { method: 'PATCH' });
+      await fetch(`/admin/promote-user/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
       loadUsers();
     }
   });
 
-  // Initial
   loadUsers();
 </script>
 
