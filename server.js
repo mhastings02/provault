@@ -1,14 +1,12 @@
-
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 
-const app = express();
+const app = express(); // ← MUST come first
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json()); // ← Correct
+app.use(express.urlencoded({ extended: true })); // ← Correct
 
 // Serve static frontend
 app.use(express.static(path.join(__dirname)));
@@ -22,9 +20,10 @@ app.use('/admin', adminRoutes);
 
 // Default route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'login.html'));
+  res.sendFile(path.join(__dirname, 'login.html'));
 });
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
