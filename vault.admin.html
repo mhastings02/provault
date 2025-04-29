@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – User Management</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f4f4f4; }
+    input, select { padding: 5px; }
+    button { margin-right: 5px; }
+    #searchInput { width: 50%; padding: 6px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <img src="images/logo.png" alt="PromptVault Pro Logo" class="logo-small">
+    <div id="nav-buttons">
+      <button onclick="logout()" class="btn-secondary">Logout</button>
+    </div>
+  </nav>
+
+  <main class="vault-container">
+    <h1>Admin User Management</h1>
+    <input type="text" id="searchInput" placeholder="Search by username or email">
+    <button onclick="fetchUsers()">🔄 Refresh</button>
+
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script>
+    async function fetchUsers() {
+      const res = await fetch('/admin/users');
+      const users = await res.json();
+      renderUsers(users);
+    }
+
+    function renderUsers(users) {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const tbody = document.querySelector('#userTable tbody');
+      tbody.innerHTML = '';
+      users
+        .filter(u => u.username.toLowerCase().includes(search) || u.email.toLowerCase().includes(search))
+        .forEach(user => {
+          tbody.innerHTML += `
+            <tr>
+              <td contenteditable onblur="updateUserField('${user._id}', 'username', this.innerText)">${user.username}</td>
+              <td contenteditable onblur="updateUserField('${user._id}', 'email', this.innerText)">${user.email}</td>
+              <td>
+                <select onchange="promoteUser('${user._id}', this.value)">
+                  <option value="user" ${user.role === 'user' ? 'selected' : ''}>user</option>
+                  <option value="pro" ${user.role === 'pro' ? 'selected' : ''}>pro</option>
+                  <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>admin</option>
+                </select>
+              </td>
+              <td>
+                <button onclick="deleteUser('${user._id}')">🗑 Delete</button>
+              </td>
+            </tr>`;
+        });
+    }
+
+    async function promoteUser(id, role) {
+      await fetch('/admin/user/' + id + '/promote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      fetchUsers();
+    }
+
+    async function deleteUser(id) {
+      if (confirm('Are you sure?')) {
+        await fetch('/admin/user/' + id, { method: 'DELETE' });
+        fetchUsers();
+      }
+    }
+
+    async function updateUserField(id, field, value) {
+      const body = {};
+      body[field] = value;
+      await fetch('/admin/user/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', fetchUsers);
+    document.addEventListener('DOMContentLoaded', fetchUsers);
+  </script>
+</body>
+</html>
