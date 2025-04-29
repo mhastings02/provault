@@ -5,54 +5,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #eef2f5; margin: 0; padding: 20px; }
-    h1 { text-align: center; }
-    .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    form { display: flex; flex-direction: column; margin-bottom: 30px; }
-    input { padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; }
-    button { padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    button:hover { background-color: #0056b3; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px; border-bottom: 1px solid #ccc; text-align: left; }
-    .role { background-color: #e0e0e0; padding: 3px 6px; border-radius: 4px; font-size: 0.9em; }
-    .action-btn { margin-right: 5px; padding: 5px 10px; font-size: 0.9em; border: none; border-radius: 4px; cursor: pointer; }
-    .promote { background: #28a745; color: white; }
-    .delete { background: #dc3545; color: white; }
-    .error { color: red; margin-bottom: 15px; }
-    .success { color: green; margin-bottom: 15px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      position: relative;
+    }
+
+    .logout-btn {
+      position: absolute;
+      right: 30px;
+      top: 20px;
+      background-color: #ff4d4f;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 30px;
+    }
+
+    input {
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+
+    .role {
+      background-color: #e0e0e0;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    .action-btn {
+      margin-right: 5px;
+      padding: 5px 10px;
+      font-size: 0.9em;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .promote {
+      background: #28a745;
+      color: white;
+    }
+
+    .delete {
+      background: #dc3545;
+      color: white;
+    }
+
+    .error {
+      color: red;
+      margin-bottom: 15px;
+    }
+
+    .success {
+      color: green;
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>Admin Dashboard</h1>
+  <div class="container">
+    <h1>
+      Admin Dashboard
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </h1>
 
-  <h3>Create New User</h3>
-  <form id="createUserForm">
-    <input type="text" id="newName" placeholder="Full Name" required />
-    <input type="email" id="newEmail" placeholder="Email" required />
-    <input type="password" id="newPassword" placeholder="Password" required />
-    <button type="submit">Create User</button>
-    <div id="formMessage" class="error"></div>
-  </form>
+    <h3>Create New User</h3>
+    <form id="createUserForm">
+      <input type="text" id="newName" placeholder="Full Name" required />
+      <input type="email" id="newEmail" placeholder="Email" required />
+      <input type="password" id="newPassword" placeholder="Password" required />
+      <button type="submit">Create User</button>
+      <div id="formMessage" class="error"></div>
+    </form>
 
-  <h3>All Users</h3>
-  <table id="userTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Users will populate here -->
-    </tbody>
-  </table>
-</div>
+    <h3>All Users</h3>
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Users will populate here -->
+      </tbody>
+    </table>
+  </div>
 
 <script>
-  // Protect dashboard: Only allow logged-in admins
+  // Protect this page — allow only admins
   fetch('/auth/check')
     .then(res => res.json())
     .then(data => {
@@ -60,6 +157,13 @@
         window.location.href = '/login.html';
       }
     });
+
+  function logout() {
+    fetch('/auth/logout', { method: 'POST' })
+      .then(() => {
+        window.location.href = '/login.html';
+      });
+  }
 
   async function loadUsers() {
     const res = await fetch('/admin/users');
@@ -85,6 +189,7 @@
 
   document.getElementById('createUserForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const name = document.getElementById('newName').value;
     const email = document.getElementById('newEmail').value;
     const password = document.getElementById('newPassword').value;
@@ -138,5 +243,6 @@
 
 </body>
 </html>
+
 
 
