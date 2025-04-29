@@ -9,7 +9,8 @@ app.use(express.json()); // ← Correct
 app.use(express.urlencoded({ extended: true })); // ← Correct
 
 // Serve static frontend
-app.use(express.static(path.join(__dirname)));
+app.use(express.static('public'));
+
 
 // Routes
 const authRoutes = require('./routes/auth');
