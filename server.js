@@ -5,8 +5,8 @@ const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
-// ⬇️ Load your Passport config before anything else
-require('./routes/config/passport')(passport); // adjust path if different
+// ⬇️ Load Passport config before anything else
+require('./routes/config/passport')(passport);
 
 const app = express();
 
@@ -15,12 +15,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Log the connection string (for debugging)
+console.log('MONGODB_URI:', process.env.MONGODB_URI);
+
 // Sessions
 app.use(session({
   secret: 'supersecretkey',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI })
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI
+  })
 }));
 
 // Passport init
@@ -45,5 +50,6 @@ app.get('/', (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
