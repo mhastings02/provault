@@ -17,7 +17,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 
 app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
+
 
 // Default route
 const path = require('path'); // Make sure this is at the top
