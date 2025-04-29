@@ -1,0 +1,42 @@
+[
+  {
+    "category": "Marketing",
+    "name": "Blog Post Generator",
+    "prompt": "Write a detailed blog post about [topic] for [target audience] in a [tone] tone."
+  },
+  {
+    "category": "Marketing",
+    "name": "Social Media Post",
+    "prompt": "Write an engaging LinkedIn post about [topic] highlighting [key point]."
+  },
+  {
+    "category": "Business",
+    "name": "Business Name Ideas",
+    "prompt": "Suggest 10 creative business names for a startup in [industry]."
+  },
+  {
+    "category": "Business",
+    "name": "Email Outreach",
+    "prompt": "Draft a friendly email to introduce [product/service] to a potential client."
+  },
+  {
+    "category": "Personal Growth",
+    "name": "Personal Development Plan",
+    "prompt": "Create a 30-day plan to improve [skill/goal]."
+  },
+  {
+    "category": "Education",
+    "name": "Lesson Plan",
+    "prompt": "Design a 1-hour lesson plan to teach [topic] to [audience type]."
+  },
+  {
+    "category": "Creative",
+    "name": "Story Starter",
+    "prompt": "Write the first paragraph of a short story set in [setting] with a [tone] tone."
+  },
+  {
+    "category": "Technical",
+    "name": "Code Snippet Generator",
+    "prompt": "Generate a [language] code snippet to accomplish [task]."
+  }
+]

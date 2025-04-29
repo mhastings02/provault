@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vault - PromptVault Pro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="nav-bar">
+    <img src="images/logo.png" alt="PromptVault Pro Logo" class="logo-small">
+    <div id="nav-buttons">
+      <button onclick="goToUpgrade()" class="btn-secondary" id="upgradeNavBtn" style="display:none;">Upgrade to Pro</button>
+      <button onclick="logout()" class="btn-secondary">Logout</button>
+    </div>
+  </nav>
+
+  <main class="vault-container">
+    <h1>Your Prompt Vault</h1>
+
+    <div id="proFeatures" class="locked">
+      <p>Unlock Pro to Access Premium Features!</p>
+      <button onclick="unlockPro()" class="btn-primary">Unlock Pro</button>
+    </div>
+
+    <div id="vaultContent" class="hidden">
+      <p>Welcome to your Vault! 🎉</p>
+      <div class="completion-tracker">
+        <label for="completion">Vault Completion:</label>
+        <progress id="completion" value="0" max="100"></progress>
+      </div>
+
+      <div class="button-group">
+        <select id="folderSelect"></select>
+        <button onclick="createFolder()" class="btn-secondary">+ Create Folder</button>
+      </div>
+
+      <div class="button-group">
+        <button onclick="addVaultEntry()" class="btn-primary">Add Entry</button>
+        <button onclick="importGptPrompts()" class="btn-primary">Import GPT Prompts</button>
+        <button onclick="browseTemplates()" class="btn-primary">Browse Templates</button>
+        <button onclick="clearVault()" class="btn-secondary">Clear Vault</button>
+      </div>
+
+      <div id="proButtons" class="button-group" style="display:none;">
+        <button onclick="exportVault()" class="btn-primary">Export Vault</button>
+        <button onclick="shareVault()" class="btn-primary">Share Vault</button>
+      </div>
+
+      <div class="button-group">
+        <label>Viewing Folder:</label>
+        <select id="folderView" onchange="loadVaultEntries()"></select>
+      </div>
+
+      <div id="entries" class="entries-container"></div>
+    </div>
+  </main>
+
+  <!-- Modal for Templates -->
+  <div id="templateModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeTemplateModal()">×</span>
+      <h2>Choose a Template</h2>
+      <div id="templateList"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    function goToUpgrade() {
+      window.location.href = "upgrade.html";
+    }
+  </script>
+</body>
+</html>
