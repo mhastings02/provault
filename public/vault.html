@@ -2,65 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Vault - PromptVault Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Prompt Vault</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <nav class="navbar">
-    <div class="nav-left">
-      <img src="images/logo.png" alt="PromptVault Pro Logo" class="logo" />
-      <span class="logo-title">PromptVault Pro</span>
-    </div>
-    <div class="nav-right">
-      <button onclick="logout()" class="btn-secondary">Logout</button>
-    </div>
+    <img src="images/logo.png" alt="PromptVault Pro Logo" class="nav-logo" />
+    <span class="nav-title">PromptVault Pro</span>
+    <button onclick="logout()" class="btn-logout">Logout</button>
   </nav>
 
   <main class="vault-container">
-    <div class="vault-card">
-      <h1>Your Prompt Vault</h1>
+    <h2>Your Prompt Vault</h2>
 
-      <form id="promptForm">
-        <input type="text" id="promptInput" placeholder="Enter your prompt..." required />
-        <button type="submit" class="btn-primary">Save Prompt</button>
-      </form>
-
-      <ul id="promptList" class="prompt-list"></ul>
+    <!-- Pro Alert -->
+    <div id="proBanner" class="pro-banner hidden">
+      <p>🔒 Unlock Pro to Access Premium Features!</p>
+      <button onclick="window.location.href='upgrade.html'" class="btn-upgrade">Upgrade to Pro</button>
     </div>
+
+    <!-- Prompt Input -->
+    <form id="promptForm" class="prompt-form">
+      <input type="text" id="promptInput" placeholder="Enter your prompt..." required />
+      <button type="submit" class="btn-primary">Save Prompt</button>
+    </form>
+
+    <!-- Prompt List -->
+    <ul id="promptList" class="prompt-list"></ul>
   </main>
 
   <script>
-    let prompts = [];
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    const promptInput = document.getElementById('promptInput');
+    const promptForm = document.getElementById('promptForm');
+    const promptList = document.getElementById('promptList');
+    const proBanner = document.getElementById('proBanner');
 
-    function logout() {
-      fetch('/logout', { method: 'POST' }).then(() => {
-        window.location.href = '/login.html';
-      });
-    }
-
-    document.getElementById('promptForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = document.getElementById('promptInput');
-      const text = input.value.trim();
-      if (text) {
-        prompts.push(text);
-        input.value = '';
-        renderPrompts();
-      }
-    });
+    const prompts = JSON.parse(localStorage.getItem('prompts') || '[]');
 
     function renderPrompts() {
-      const list = document.getElementById('promptList');
-      list.innerHTML = '';
-      prompts.forEach((prompt, i) => {
+      promptList.innerHTML = '';
+      prompts.forEach((p, i) => {
         const li = document.createElement('li');
-        li.textContent = prompt;
-        list.appendChild(li);
+        li.textContent = p;
+        promptList.appendChild(li);
       });
     }
+
+    function logout() {
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+
+    promptForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const isPro = user?.isPro || user?.role === 'admin';
+      if (!isPro && prompts.length >= 3) {
+        alert("Upgrade to Pro to save more prompts!");
+        return;
+      }
+
+      prompts.push(promptInput.value);
+      localStorage.setItem('prompts', JSON.stringify(prompts));
+      promptInput.value = '';
+      renderPrompts();
+    });
+
+    // Show upgrade banner for non-pro users
+    if (!user?.isPro && user?.role !== 'admin') {
+      proBanner.classList.remove('hidden');
+    }
+
+    renderPrompts();
   </script>
 
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background: #0c457a;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      height: 40px;
+    }
+
+    .nav-title {
+      font-size: 20px;
+      margin-left: 10px;
+      flex: 1;
+    }
+
+    .btn-logout {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .vault-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .pro-banner {
+      background: #ffe5e5;
+      border: 1px dashed red;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .prompt-form input {
+      padding: 10px;
+      width: 70%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    .btn-primary, .btn-upgrade {
+      background: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .prompt-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .prompt-list li {
+      background: #f0f0f0;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: left;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </body>
 </html>
+
