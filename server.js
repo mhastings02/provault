@@ -4,7 +4,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const path = require('path');
-require('dotenv').config(); // Optional if using .env locally
 
 const app = express();
 
@@ -25,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ Sessions
 app.use(session({
-  secret: 'supersecretkey', // replace with a secure secret in production
+  secret: 'supersecretkey', // Replace with a secure value in production
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
@@ -51,16 +50,17 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ Fallback route for 404s
+// ✅ Fallback 404 route
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
 
-// ✅ Start the server
+// ✅ Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
 
