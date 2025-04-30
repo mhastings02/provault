@@ -22,9 +22,9 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Sessions
+// ✅ Sessions with valid options passed
 app.use(session({
-  secret: 'supersecretkey', // Replace with a secure value in production
+  secret: 'supersecretkey', // Use an environment variable in production
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
@@ -45,12 +45,12 @@ const adminRoutes = require('./routes/admin');
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 
-// ✅ Homepage route
+// ✅ Homepage (index.html)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ Fallback 404 route
+// ✅ Catch-all fallback for unhandled routes
 app.use((req, res) => {
   res.status(404).send('Page not found');
 });
