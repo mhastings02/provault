@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <nav class="navbar">
     <div class="nav-left">
       <img src="images/logo.png" alt="PromptVault Pro Logo" class="logo" />
@@ -20,24 +21,46 @@
   <main class="vault-container">
     <div class="vault-card">
       <h1>Your Prompt Vault</h1>
-      <div class="vault-locked">
-        <p>🔒 Unlock Pro to Access Premium Features!</p>
-        <button onclick="goToUpgrade()" class="btn-primary">Unlock Pro</button>
-      </div>
+
+      <form id="promptForm">
+        <input type="text" id="promptInput" placeholder="Enter your prompt..." required />
+        <button type="submit" class="btn-primary">Save Prompt</button>
+      </form>
+
+      <ul id="promptList" class="prompt-list"></ul>
     </div>
   </main>
 
   <script>
+    let prompts = [];
+
     function logout() {
       fetch('/logout', { method: 'POST' }).then(() => {
         window.location.href = '/login.html';
       });
     }
 
-    function goToUpgrade() {
-      window.location.href = 'upgrade.html';
+    document.getElementById('promptForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('promptInput');
+      const text = input.value.trim();
+      if (text) {
+        prompts.push(text);
+        input.value = '';
+        renderPrompts();
+      }
+    });
+
+    function renderPrompts() {
+      const list = document.getElementById('promptList');
+      list.innerHTML = '';
+      prompts.forEach((prompt, i) => {
+        const li = document.createElement('li');
+        li.textContent = prompt;
+        list.appendChild(li);
+      });
     }
   </script>
+
 </body>
 </html>
-
