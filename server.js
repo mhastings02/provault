@@ -45,13 +45,29 @@ app.get('/', (req, res) => {
 });
 
 // ✅ Auth routes
-app.post('/auth/login', passport.authenticate('local'), (req, res) => {
-  res.json({ success: true, role: req.user.role });
+app.post('/register', (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'Missing fields' });
+  }
+
+  if (users.find(u => u.email === email)) {
+    return res.status(400).json({ error: 'User already exists' });
+  }
+
+  const newUser = {
+    id: String(users.length + 1),
+    username: name,
+    email,
+    password,
+    role: 'user'
+  };
+
+  users.push(newUser);
+  res.status(201).json({ message: 'User registered' });
 });
 
-app.post('/auth/logout', (req, res) => {
-  req.logout(() => res.redirect('/'));
-});
 
 app.get('/auth/check', (req, res) => {
   res.json({ isAdmin: req.user?.role === 'admin' });
