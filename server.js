@@ -6,22 +6,10 @@ const path = require('path');
 
 const app = express();
 
-// ✅ In-memory fake users
+// ✅ In-memory users for demo
 const users = [
-  {
-    id: '1',
-    username: 'Admin',
-    email: 'admin@example.com',
-    password: 'Admin123!', // plain text (demo only!)
-    role: 'admin'
-  },
-  {
-    id: '2',
-    username: 'NormalUser',
-    email: 'user@example.com',
-    password: 'User123!',
-    role: 'user'
-  }
+  { id: '1', username: 'Admin', email: 'admin@example.com', password: 'Admin123!', role: 'admin' },
+  { id: '2', username: 'User', email: 'user@example.com', password: 'User123!', role: 'user' }
 ];
 
 // ✅ Passport config
@@ -40,18 +28,21 @@ passport.deserializeUser((id, done) => {
 // ✅ Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(session({
   secret: 'demo-secret',
   resave: false,
   saveUninitialized: false
 }));
-
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ✅ Serve frontend
+// ✅ Serve static HTML from /public
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ✅ Homepage route (Fixes 404)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // ✅ Auth routes
 app.post('/auth/login', passport.authenticate('local'), (req, res) => {
@@ -66,7 +57,7 @@ app.get('/auth/check', (req, res) => {
   res.json({ isAdmin: req.user?.role === 'admin' });
 });
 
-// ✅ Admin user management — in-memory
+// ✅ Admin demo-only routes (memory)
 app.get('/admin/users', (req, res) => {
   if (req.user?.role !== 'admin') return res.sendStatus(403);
   res.json(users);
@@ -77,7 +68,7 @@ app.post('/admin/create-user', (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) return res.status(400).json({ error: 'Missing fields' });
 
-  if (users.some(u => u.email === email)) {
+  if (users.find(u => u.email === email)) {
     return res.status(400).json({ error: 'User already exists' });
   }
 
@@ -115,19 +106,17 @@ app.delete('/admin/delete-user/:id', (req, res) => {
   }
 });
 
-// ✅ Home route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 // ✅ Fallback
 app.use((req, res) => {
-  res.status(404).send('Not found');
+  res.status(404).send('Page not found');
 });
 
-// ✅ Start server
+// ✅ Start
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
 
 
 
