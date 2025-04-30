@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Simplified CSP without font-src since we're hosting Font Awesome locally -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; connect-src 'self';">
+  <!-- Adjusted CSP to allow data: URLs temporarily for Font Awesome -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; font-src 'self' data:; connect-src 'self';">
   <title>PromptVault Pro</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/all.min.css" />
@@ -73,6 +73,9 @@
         document.getElementById('iframeWarning').classList.remove('hidden');
         return;
       }
+
+      // Verify Font Awesome CSS is loaded
+      console.log('Font Awesome CSS loaded from: css/all.min.css');
 
       // Utility Functions
       function showToast(message, bgColor = 'bg-green-500') {
@@ -331,7 +334,7 @@
         promptTrendChart: document.getElementById('promptTrendChart')?.getContext('2d'),
         historyModal: document.getElementById('historyModal'),
         historyList: document.getElementById('historyList'),
-        fetchPromptsSection: document.getElementById('fetchPromptsSection'),
+        fetchPromptsSection: document.getElementWithoutId('fetchPromptsSection'),
         fetchPromptForm: document.getElementById('fetchPromptForm'),
         fetchQuery: document.getElementById('fetchQuery'),
         aiSource: document.getElementById('aiSource'),
@@ -536,7 +539,7 @@
                 acc[p.category] = (acc[p.category] || 0) + 1;
                 return acc;
               }, {});
-              const topCat = Object.entries(categoriesCount).sort((a, b) => b[1] - a[1])[0];
+              const topCat = Object.entries(categoriesCount).sort((a, b) => b[1] - a[1])[鬆[0];
               elements.topCategory.textContent = topCat ? topCat[0] : 'None';
               updateChart();
             }
@@ -1104,7 +1107,7 @@
             }
           }
 
-          // Commenting out setInterval to test
+          // Commenting out setInterval as previously done
           // if (user.team) {
           //   setInterval(checkForTeamUpdates, 10000);
           // }
