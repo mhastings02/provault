@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <header class="header">
     <img src="images/logo.png" alt="PromptVault Pro Logo" class="logo">
     <h1>Save, Organize, and Share Your Best Prompts</h1>
@@ -31,14 +32,29 @@
     <p>Start free today. Upgrade anytime for more powerful features!</p>
   </main>
 
-  <footer class="footer">
+  <!-- Admin Login Button -->
+  <div style="text-align: center; margin-top: 40px;">
+    <a href="admin-login.html" style="
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #444;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+    ">
+      Admin Login
+    </a>
+  </div>
+
+  <footer class="footer" style="margin-top: 60px;">
     <p>© 2025 PromptVault Pro. All rights reserved.</p>
     <p>
-  <a href="admin-login.html">Admin Login</a> |
-  <a href="login.html">Login</a> |
-  <a href="upgrade.html">Upgrade</a>
-</p>
-
+      <a href="admin-login.html">Admin Login</a> |
+      <a href="login.html">Login</a> |
+      <a href="upgrade.html">Upgrade</a>
+    </p>
   </footer>
 
   <script>
@@ -49,38 +65,8 @@
       window.location.href = "upgrade.html";
     }
   </script>
-  ...
-</footer>
-
-<!-- Admin Login Button -->
-<div style="text-align: center; margin-top: 40px;">
-  <a href="admin-login.html" style="
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #444;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 14px;
-  ">
-    Admin Login
-  </a>
-</div>
-
-
-<script>
-  function goToLogin() {
-    window.location.href = "login.html";
-  }
-  function goToUpgrade() {
-    window.location.href = "upgrade.html";
-  }
-</script>
-
-</body> <!-- ✅ Keep this last -->
-</html>
 
 </body>
 </html>
+
 
