@@ -1,55 +1,67 @@
 const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const passport = require('passport');
+const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-
-// ⬇️ Load Passport config before anything else
-require('./routes/config/passport')(passport);
+const passport = require('passport');
+const path = require('path');
+require('dotenv').config(); // Optional if using .env locally
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ✅ Load Passport config
+require('./routes/config/passport')(passport);
+
+// ✅ MongoDB connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ MongoDB connected'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ✅ Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Log the connection string (for debugging)
-console.log('MONGODB_URI:', process.env.MONGODB_URI);
-
-// Sessions
+// ✅ Sessions
 app.use(session({
-  secret: 'supersecretkey',
+  secret: 'supersecretkey', // replace with a secure secret in production
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI
-  })
+    mongoUrl: process.env.MONGODB_URI,
+  }),
 }));
 
-// Passport init
+// ✅ Passport init
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Serve static frontend
-app.use(express.static('public'));
+// ✅ Serve static files from public/
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
+// ✅ Routes
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
-
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 
-// Default route
+// ✅ Homepage route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start server
+// ✅ Fallback route for 404s
+app.use((req, res) => {
+  res.status(404).send('Page not found');
+});
+
+// ✅ Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
 
 
 
