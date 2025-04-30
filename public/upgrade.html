@@ -1,35 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Upgrade to Pro - PromptVault Pro</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PromptVault Pro - Vault</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="upgrade-container">
-    <img src="images/logo.png" alt="PromptVault Pro Logo" class="logo-small">
-    <h1>Enjoy 7 Days Free - Unlock Full Power!</h1>
-    <p>Upgrade to PromptVault Pro with a 7-day free trial. Risk-free, cancel anytime before billing!</p>
 
-    <div class="features-list">
-      <p>✅ Unlimited Vault Entries</p>
-      <p>✅ Import & Save GPT Prompts</p>
-      <p>✅ Export Vault to CSV</p>
-      <p>✅ Public Vault Sharing</p>
-      <p>✅ Priority Support</p>
+  <nav class="navbar">
+    <div class="nav-left">
+      <img src="images/logo.png" alt="PromptVault Pro Logo" class="logo" />
+      <span class="logo-title">PromptVault Pro</span>
     </div>
+    <div class="nav-right">
+      <button onclick="logout()" class="btn-secondary">Logout</button>
+    </div>
+  </nav>
 
-    <h2>Then Only $5/month or $50/year</h2>
+  <main class="vault-container">
+    <div class="vault-card">
+      <h1>Your Prompt Vault</h1>
 
-    <button onclick="upgrade()" class="btn-primary">Start Free Trial</button>
-    <p><a href="vault.html" class="btn-secondary">Back to Vault</a></p>
-  </div>
+      <form id="promptForm">
+        <input type="text" id="promptInput" placeholder="Enter your prompt..." required />
+        <button type="submit" class="btn-primary">Save Prompt</button>
+      </form>
+
+      <ul id="promptList" class="prompt-list"></ul>
+
+      <div id="proFeatures" class="pro-lock">
+        🔒 Unlock Pro to Access Premium Features!
+        <button onclick="goToUpgrade()" class="btn-primary" style="margin-top: 10px;">Upgrade Pro</button>
+      </div>
+    </div>
+  </main>
 
   <script>
-    function upgrade() {
-      window.location.href = "https://buy.stripe.com/fZeg35byw4kN0PCbIJ";
+    let prompts = [];
+    let isPro = false; // For now, simulate user type. You can toggle this to test.
+
+    function logout() {
+      fetch('/logout', { method: 'POST' }).then(() => {
+        window.location.href = '/login.html';
+      });
     }
+
+    function goToUpgrade() {
+      window.location.href = "upgrade.html";
+    }
+
+    document.getElementById('promptForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('promptInput');
+      const text = input.value.trim();
+      if (text) {
+        prompts.push(text);
+        input.value = '';
+        renderPrompts();
+      }
+    });
+
+    function renderPrompts() {
+      const list = document.getElementById('promptList');
+      list.innerHTML = '';
+      prompts.forEach((prompt, index) => {
+        const li = document.createElement('li');
+        li.textContent = prompt;
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.className = 'btn-secondary small';
+        delBtn.onclick = () => {
+          prompts.splice(index, 1);
+          renderPrompts();
+        };
+
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+    }
+
+    // Conditional render
+    window.onload = () => {
+      if (isPro) {
+        document.getElementById('proFeatures').style.display = 'none';
+      }
+    };
   </script>
+
 </body>
 </html>
