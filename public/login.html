@@ -38,8 +38,7 @@
       const errorBox = document.getElementById('loginError');
 
       try {
-        const res = await fetch('/register', {
- {
+        const res = await fetch('/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -69,7 +68,7 @@
       const errorBox = document.getElementById('registerError');
 
       try {
-        const res = await fetch('/admin/create-user', {
+        const res = await fetch('/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password })
@@ -89,3 +88,4 @@
 
 </body>
 </html>
+
