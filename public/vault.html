@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Adjusted CSP to allow data: URLs temporarily for Font Awesome -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; font-src 'self' data:; connect-src 'self';">
+  <!-- Updated CSP with nonce for inline script -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net 'nonce-{{nonce}}'; font-src 'self' data:; connect-src 'self';">
   <title>PromptVault Pro</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.3/dist/tailwind.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/all.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     .prompt-enter {
       animation: slideIn 0.3s ease-in;
@@ -33,6 +33,9 @@
     .sidebar {
       transition: transform 0.3s ease-in-out;
     }
+    .modal {
+      transition: opacity 0.3s ease-in-out;
+    }
     [data-theme="dark"] {
       background: #1f2937;
       color: #e5e7eb;
@@ -42,14 +45,18 @@
     [data-theme="dark"] .text-gray-900 { color: #e5e7eb; }
     [data-theme="dark"] .border-gray-300 { border-color: #6b7280; }
     [data-theme="dark"] canvas { background: #374151; }
+    [data-theme="dark"] .bg-indigo-50 { background: #4b5e8e; }
+    [data-theme="dark"] .bg-blue-50 { background: #3b4f7a; }
+    [data-theme="dark"] .bg-green-50 { background: #3a5849; }
+    [data-theme="dark"] .bg-yellow-100 { background: #5a4a2b; }
   </style>
 </head>
 <body class="bg-gray-100 font-sans transition-colors duration-200" data-theme="light">
   <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-lg hidden toast" role="alert"></div>
+  <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-lg hidden toast" role="alert" aria-live="polite"></div>
 
   <!-- Iframe Warning -->
-  <div id="iframeWarning" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+  <div id="iframeWarning" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden" role="alert">
     <div class="bg-white p-4 rounded-md shadow-lg max-w-md w-full text-center">
       <p class="text-red-600 font-semibold">This page cannot be loaded in an iframe.</p>
       <p>Please open it directly in a browser window to use PromptVault Pro.</p>
@@ -57,7 +64,7 @@
   </div>
 
   <!-- Loading Indicator -->
-  <div id="loading" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+  <div id="loading" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden" role="status">
     <div class="bg-white p-4 rounded-md shadow-lg">
       <p>Loading PromptVault Pro... Please wait.</p>
     </div>
@@ -66,16 +73,13 @@
   <!-- Main Content -->
   <div id="appContainer"></div>
 
-  <script>
-    (function() {
+  <script nonce="{{nonce}}">
+    (async () => {
       // Check if the page is being loaded in an iframe
       if (window.self !== window.top) {
         document.getElementById('iframeWarning').classList.remove('hidden');
         return;
       }
-
-      // Verify Font Awesome CSS is loaded
-      console.log('Font Awesome CSS loaded from: css/all.min.css');
 
       // Utility Functions
       function showToast(message, bgColor = 'bg-green-500') {
@@ -133,7 +137,7 @@
       }
 
       // Check Authentication
-      let user = safeGetItem('user', null);
+      const user = safeGetItem('user', null);
       if (!user || !user.name) {
         showToast('Please log in to access PromptVault Pro.', 'bg-yellow-500');
         setTimeout(() => window.location.href = 'login.html', 2000);
@@ -148,7 +152,7 @@
       const renderTimeout = setTimeout(() => {
         loading.classList.add('hidden');
         showToast('Page took too long to load. Please refresh and try again.', 'bg-red-500');
-      }, 10000); // 10-second timeout
+      }, 10000);
 
       // Inject Main Content
       const appContainer = document.getElementById('appContainer');
@@ -242,16 +246,16 @@
           </div>
 
           <!-- Modals -->
-          <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+          <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden modal" role="dialog" aria-labelledby="historyModalTitle">
             <div class="bg-white p-6 rounded-lg max-w-md w-full">
-              <h3 class="text-lg font-semibold mb-4">Prompt History</h3>
+              <h3 id="historyModalTitle" class="text-lg font-semibold mb-4">Prompt History</h3>
               <ul id="historyList" class="space-y-2 max-h-64 overflow-y-auto"></ul>
               <button id="closeHistoryBtn" class="mt-4 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">Close</button>
             </div>
           </div>
-          <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+          <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden modal" role="dialog" aria-labelledby="previewModalTitle">
             <div class="bg-white p-6 rounded-lg max-w-lg w-full">
-              <h3 class="text-lg font-semibold mb-4">AI Prompt Suggestions</h3>
+              <h3 id="previewModalTitle" class="text-lg font-semibold mb-4">AI Prompt Suggestions</h3>
               <ul id="previewList" class="space-y-4 max-h-64 overflow-y-auto"></ul>
               <div class="flex justify-end space-x-2 mt-4">
                 <button id="closePreviewBtn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">Cancel</button>
@@ -259,9 +263,9 @@
               </div>
             </div>
           </div>
-          <div id="apiSettingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+          <div id="apiSettingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden modal" role="dialog" aria-labelledby="apiSettingsModalTitle">
             <div class="bg-white p-6 rounded-lg max-w-md w-full">
-              <h3 class="text-lg font-semibold mb-4">API Settings</h3>
+              <h3 id="apiSettingsModalTitle" class="text-lg font-semibold mb-4">API Settings</h3>
               <div id="apiSettingsForm" class="space-y-4">
                 <div>
                   <label for="grokApiKey" class="block text-sm font-medium">Grok API Key</label>
@@ -278,9 +282,9 @@
               </div>
             </div>
           </div>
-          <div id="supportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+          <div id="supportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden modal" role="dialog" aria-labelledby="supportModalTitle">
             <div class="bg-white p-6 rounded-lg max-w-md w-full">
-              <h3 class="text-lg font-semibold mb-4">Contact Priority Support</h3>
+              <h3 id="supportModalTitle" class="text-lg font-semibold mb-4">Contact Priority Support</h3>
               <div id="supportForm" class="space-y-4">
                 <div>
                   <label for="supportIssue" class="block text-sm font-medium">Describe Your Issue</label>
@@ -334,7 +338,7 @@
         promptTrendChart: document.getElementById('promptTrendChart')?.getContext('2d'),
         historyModal: document.getElementById('historyModal'),
         historyList: document.getElementById('historyList'),
-        fetchPromptsSection: document.getElementWithoutId('fetchPromptsSection'),
+        fetchPromptsSection: document.getElementById('fetchPromptsSection'),
         fetchPromptForm: document.getElementById('fetchPromptForm'),
         fetchQuery: document.getElementById('fetchQuery'),
         aiSource: document.getElementById('aiSource'),
@@ -473,7 +477,7 @@
         let lastTeamActivityHash = '';
 
         function hashArray(arr) {
-          return arr.map(item => JSON.stringify(item)).join('|');
+          return JSON.stringify(arr);
         }
 
         return (filter = '', category = '') => {
@@ -502,31 +506,31 @@
               (!category || p.category === category)
             );
             elements.promptList.innerHTML = filteredPrompts.map((p, i) => `
-              <li class="bg-gray-50 p-4 rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center prompt-enter draggable" draggable="true" data-index="${i}">
+              <li class="bg-gray-50 p-4 rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center prompt-enter draggable" draggable="true" data-index="${i}" role="listitem">
                 <div class="flex-1">
                   <span class="font-semibold text-indigo-600">[${p.category}]</span> ${p.text}
                   ${p.shared ? '<span class="ml-2 text-sm text-green-600">(Shared with Team)</span>' : ''}
                   ${p.tagged?.length ? `<span class="ml-2 text-sm text-blue-600">(Tagged: ${p.tagged.join(', ')})</span>` : ''}
                 </div>
-                <div class="mt-2 sm:mt-0 space-x-2">
-                  ${user.isPro ? `<button class="view-history text-purple-500 hover:text-purple-700" data-index="${i}" aria-label="View history"><i class="fas fa-history"></i></button>` : ''}
-                  <button class="edit-prompt text-blue-500 hover:text-blue-700" data-index="${i}" aria-label="Edit prompt"><i class="fas fa-edit"></i></button>
-                  <button class="delete-prompt text-red-500 hover:text-red-700" data-index="${i}" aria-label="Delete prompt"><i class="fas fa-trash"></i></button>
-                  ${user.team && p.category === 'Team' ? `<button class="toggle-share text-green-500 hover:text-green-700" data-index="${i}" aria-label="${p.shared ? 'Unshare' : 'Share'} with team"><i class="fas ${p.shared ? 'fa-user-slash' : 'fa-users'}"></i></button>` : ''}
+                <div class="mt-2 sm:mt-0 space-x-2 flex">
+                  ${user.isPro ? `<button class="view-history text-purple-500 hover:text-purple-700" data-index="${i}" aria-label="View history for prompt ${p.text}"><i class="fas fa-history"></i></button>` : ''}
+                  <button class="edit-prompt text-blue-500 hover:text-blue-700" data-index="${i}" aria-label="Edit prompt ${p.text}"><i class="fas fa-edit"></i></button>
+                  <button class="delete-prompt text-red-500 hover:text-red-700" data-index="${i}" aria-label="Delete prompt ${p.text}"><i class="fas fa-trash"></i></button>
+                  ${user.team && p.category === 'Team' ? `<button class="toggle-share text-green-500 hover:text-green-700" data-index="${i}" aria-label="${p.shared ? 'Unshare' : 'Share'} prompt ${p.text} with team"><i class="fas ${p.shared ? 'fa-user-slash' : 'fa-users'}"></i></button>` : ''}
                 </div>
               </li>
             `).join('');
 
             // Update Team Prompts
             elements.teamPromptList.innerHTML = teamPrompts.map(p => `
-              <li class="bg-indigo-100 p-2 rounded-md text-sm">
+              <li class="bg-indigo-100 p-2 rounded-md text-sm" role="listitem">
                 ${p.text} ${p.tagged?.length ? `<span class="text-blue-600">(${p.tagged.join(', ')})</span>` : ''}
               </li>
             `).join('');
 
             // Update Team Activity
             elements.teamActivityList.innerHTML = teamActivity.slice(-5).reverse().map(a => `
-              <li class="bg-gray-100 p-2 rounded-md text-sm">
+              <li class="bg-gray-100 p-2 rounded-md text-sm" role="listitem">
                 ${a.user} ${a.action} a prompt (${a.category}) at ${new Date(a.timestamp).toLocaleTimeString()}
               </li>
             `).join('');
@@ -539,7 +543,7 @@
                 acc[p.category] = (acc[p.category] || 0) + 1;
                 return acc;
               }, {});
-              const topCat = Object.entries(categoriesCount).sort((a, b) => b[1] - a[1])[鬆[0];
+              const topCat = Object.entries(categoriesCount).sort((a, b) => b[1] - a[1])[0];
               elements.topCategory.textContent = topCat ? topCat[0] : 'None';
               updateChart();
             }
@@ -613,6 +617,15 @@
           elements.closePreviewBtn.addEventListener('click', closePreviewModal);
           elements.closeApiSettingsBtn.addEventListener('click', closeApiSettingsModal);
           elements.closeSupportBtn.addEventListener('click', closeSupportModal);
+
+          // Keyboard Accessibility for Modals
+          [elements.historyModal, elements.previewModal, elements.apiSettingsModal, elements.supportModal].forEach(modal => {
+            modal.addEventListener('keydown', (e) => {
+              if (e.key === 'Escape') {
+                modal.classList.add('hidden');
+              }
+            });
+          });
 
           // API Settings
           elements.apiSettingsBtn.addEventListener('click', () => {
@@ -695,7 +708,7 @@
                 const li = document.createElement('li');
                 li.className = 'bg-gray-100 p-2 rounded-md flex items-center space-x-2';
                 li.innerHTML = `
-                  <input type="checkbox" id="aiPrompt${i}" class="h-4 w-4" aria-label="Select prompt ${i + 1}" />
+                  <input type="checkbox" id="aiPrompt${i}" class="h-4 w-4" aria-label="Select AI prompt ${i + 1}" />
                   <label for="aiPrompt${i}">${prompt}</label>
                 `;
                 elements.previewList.appendChild(li);
@@ -837,7 +850,7 @@
                   teamActivity.push({
                     user: user.name,
                     action: 'edited',
-                    category: prompts[index].category,
+                    category: prompts[index].category perpetually,
                     timestamp: new Date().toISOString()
                   });
                   safeSetItem('teamActivity', teamActivity);
@@ -1089,12 +1102,12 @@
           });
 
           // Team Updates
-          function checkForTeamUpdates() {
+          async function checkForTeamUpdates() {
             try {
               const storedPrompts = safeGetItem('prompts', []);
               const storedActivity = safeGetItem('teamActivity', []);
-              const promptsChanged = storedPrompts.length !== prompts.length || storedPrompts.some((p, i) => JSON.stringify(p) !== JSON.stringify(prompts[i]));
-              const activityChanged = storedActivity.length !== teamActivity.length || storedActivity.some((a, i) => JSON.stringify(a) !== JSON.stringify(teamActivity[i]));
+              const promptsChanged = JSON.stringify(storedPrompts) !== JSON.stringify(prompts);
+              const activityChanged = JSON.stringify(storedActivity) !== JSON.stringify(teamActivity);
 
               if (promptsChanged || activityChanged) {
                 prompts = storedPrompts;
@@ -1107,10 +1120,10 @@
             }
           }
 
-          // Commenting out setInterval as previously done
-          // if (user.team) {
-          //   setInterval(checkForTeamUpdates, 10000);
-          // }
+          // Re-enable team updates with optimized interval
+          if (user.team) {
+            setInterval(checkForTeamUpdates, 15000);
+          }
         }
 
         // Initialize
